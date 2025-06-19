@@ -1,0 +1,106 @@
+DC No Scan --> header
+DC No maual ...
+
+INTERNAL DOCUMENT
+ADSTORAGE ---> WHERE UNIQUEID = 67845101
+
+---------------------*----------------------*-------------------------*---------------------*-
+
+My Query -----> SELECT * FROM DB2INST1.INTERNALDOCUMENT 
+                WHERE PROVISIONALCODE = %s
+                FETCH FIRST 1 ROWS ONLY
+
+Query ---------> 
+SELECT 
+    ID.COMPANYCODE,ID.DIVISIONCODE,ID.TEMPLATECODE,ID.PROVISIONALCOUNTERCODE,
+    ID.PROVISIONALCODE,ID.PROVISIONALDOCUMENTDATE,OC.LONGDESCRIPTION,
+    IDL.ITEMDESCRIPTION,IDL.BASEPRIMARYQUANTITY,IDL.BASEPRIMARYUOMCODE,AD.ADDRESSEE,
+    ADS_VALUESTRING(ID.ABSUNIQUEID, 'InternalDocument', 'VEHICLENUMBER', 'VEHICLENUMBER') AS VehicleNumber,
+    ADS_VALUESTRING(ID.ABSUNIQUEID, 'InternalDocument', 'NoofPackages', 'NoofPackages') AS NoOfPackages,
+    ADS_VALUESTRING(ID.ABSUNIQUEID, 'InternalDocument', 'MOBILENO', 'MOBILENO') AS MobileNo,
+    ADS_VALUESTRING(ID.ABSUNIQUEID, 'InternalDocument', 'DRIVERNAME', 'DRIVERNAME') AS DriverName
+FROM INTERNALDOCUMENT ID
+LEFT OUTER JOIN INTERNALDOCUMENTLINE IDL
+    ON IDL.INTERNALDOCUMENTCOMPANYCODE = ID.COMPANYCODE
+    AND IDL.INTDOCPROVISIONALCOUNTERCODE = ID.PROVISIONALCOUNTERCODE
+    AND IDL.INTDOCUMENTPROVISIONALCODE = ID.PROVISIONALCODE
+LEFT OUTER  JOIN ADDRESS AD 
+    ON AD.UNIQUEID = ID.DELIVERYPOINTUNIQUEID
+    AND AD.CODE = ID.DELIVERYPOINTCODE
+LEFT OUTER JOIN ORDERCATEGORY OC
+    ON OC.CODE = ID.ORDERCATEGORYCODE
+WHERE ID.TEMPLATECODE = 'D01';
+
+
+*------------------*-------------------*------------------------*--------------------------*---
+
+views.py -----------------> CODE
+
+from django.shortcuts import render
+from django.db import connection
+
+def scanner(request):
+    trips = []
+
+    if request.method == 'POST':
+        qr_input = request.POST.get('qr_code_value')
+
+        if qr_input:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT 
+                        ID.COMPANYCODE,
+                        ID.DIVISIONCODE,
+                        ID.TEMPLATECODE,
+                        ID.PROVISIONALCOUNTERCODE,
+                        ID.PROVISIONALCODE,
+                        ID.PROVISIONALDOCUMENTDATE,
+                        OC.LONGDESCRIPTION,
+                        IDL.ITEMDESCRIPTION,
+                        IDL.BASEPRIMARYQUANTITY,
+                        IDL.BASEPRIMARYUOMCODE,
+                        AD.ADDRESSEE,
+                        ADS_VALUESTRING(ID.ABSUNIQUEID, 'InternalDocument', 'VEHICLENUMBER', 'VEHICLENUMBER') AS VehicleNumber,
+                        ADS_VALUESTRING(ID.ABSUNIQUEID, 'InternalDocument', 'NoofPackages', 'NoofPackages') AS NoOfPackages,
+                        ADS_VALUESTRING(ID.ABSUNIQUEID, 'InternalDocument', 'MOBILENO', 'MOBILENO') AS MobileNo,
+                        ADS_VALUESTRING(ID.ABSUNIQUEID, 'InternalDocument', 'DRIVERNAME', 'DRIVERNAME') AS DriverName
+                    FROM DB2INST1.INTERNALDOCUMENT ID
+                    LEFT OUTER JOIN DB2INST1.INTERNALDOCUMENTLINE IDL
+                        ON IDL.INTERNALDOCUMENTCOMPANYCODE = ID.COMPANYCODE
+                        AND IDL.INTDOCPROVISIONALCOUNTERCODE = ID.PROVISIONALCOUNTERCODE
+                        AND IDL.INTDOCUMENTPROVISIONALCODE = ID.PROVISIONALCODE
+                    LEFT OUTER JOIN DB2INST1.ADDRESS AD 
+                        ON AD.UNIQUEID = ID.DELIVERYPOINTUNIQUEID
+                        AND AD.CODE = ID.DELIVERYPOINTCODE
+                    LEFT OUTER JOIN DB2INST1.ORDERCATEGORY OC
+                        ON OC.CODE = ID.ORDERCATEGORYCODE
+                    WHERE ID.TEMPLATECODE = 'D01'
+                        AND ID.PROVISIONALCODE = %s
+                """, [qr_input])
+
+                rows = cursor.fetchall()
+                if rows:
+                    for row in rows:
+                        trips.append({
+                            'companycode': row[0] or '',
+                            'divisioncode': row[1] or '',
+                            'templatecode': row[2] or '',
+                            'provisionalcountercode': row[3] or '',
+                            'provisionalcode': row[4] or '',
+                            'provisionaldocumentdate': row[5].strftime('%Y-%m-%d') if row[5] else '',
+                            'longdescription': row[6] or '',
+                            'itemdescription': row[7] or '',
+                            'baseprimaryquantity': row[8] or '',
+                            'baseprimaryuomcode': row[9] or '',
+                            'addressee': row[10] or '',
+                            'vehiclenumber': row[11] or '',
+                            'noofpackages': row[12] or '',
+                            'mobileno': row[13] or '',
+                            'drivername': row[14] or '',
+                        })
+                else:
+                    trips.append({'error': 'No matching record found.'})
+        else:
+            trips.append({'error': 'QR code is empty.'})
+
+    return render(request, 'pages/scan.html', {'trips': trips})

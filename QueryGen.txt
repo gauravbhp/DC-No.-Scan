@@ -1,0 +1,10 @@
+Steps -------
+            |
+First find PROVISIONALCODE 'DC2500000005' IN INTERNALDOCUMENT <-----> this will come from qr scan data to input then
+            |
+then through the PROVISIONALCODE find it's ABSUNIQUEID  '67845101' 
+            |
+then in another table ADSTORAGE filter this ABSUNIQUEID ------> value
+            |
+Show the data in ABSUNIQUEID   
+                                                                                                                                 
