@@ -19,7 +19,7 @@
           class="bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-yellow-300"
           style="color: #000000bf"
         >
-          DC No. Scan
+          Document Scan
         </span>
       </h2>
     </div>
@@ -106,7 +106,7 @@
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                   />
                 </svg>
-                DC No. Manual Entry
+                Document Manual Entry
               </h2>
             </div>
 
@@ -174,124 +174,99 @@
                 class="bg-gradient-to-br from-white to-yellow-50 border border-yellow-200 rounded-xl shadow-lg overflow-hidden transition transform hover:scale-[1.01]"
               >
                 <div class="px-6 py-5 sm:px-8 sm:py-6">
-                  <div
-                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4"
-                  >
-                    <div>
-                      <p
-                        class="text-xs font-semibold text-yellow-700 uppercase"
-                      >
-                        Provisional Code
-                      </p>
-                      <p
-                        class="text-sm font-medium text-gray-800"
-                        data-field="provisionalcode"
-                      >
-                        {{ trip.provisionalcode }}
-                      </p>
-                    </div>
-                    <div>
-                      <p
-                        class="text-xs font-semibold text-yellow-700 uppercase"
-                      >
-                        Qty
-                      </p>
-                      <p
-                        class="text-sm font-medium text-gray-800"
-                        data-field="baseprimaryquantity"
-                      >
-                        {{ trip.baseprimaryquantity }}
-                      </p>
-                    </div>
-                    <div>
-                      <p
-                        class="text-xs font-semibold text-yellow-700 uppercase"
-                      >
-                        UOM
-                      </p>
-                      <p
-                        class="text-sm font-medium text-gray-800"
-                        data-field="baseprimaryuomcode"
-                      >
-                        {{ trip.baseprimaryuomcode }}
-                      </p>
-                    </div>
-                    <div>
-                      <p
-                        class="text-xs font-semibold text-yellow-700 uppercase"
-                      >
-                        Address
-                      </p>
-                      <p
-                        class="text-sm font-medium text-gray-800"
-                        data-field="addressee"
-                      >
-                        {{ trip.addressee }}
-                      </p>
-                    </div>
-                    <div>
-                      <p
-                        class="text-xs font-semibold text-yellow-700 uppercase"
-                      >
-                        Vehicle No.
-                      </p>
-                      <p
-                        class="text-sm font-medium text-gray-800"
-                        data-field="vehiclenumber"
-                      >
-                        {{ trip.vehiclenumber }}
-                      </p>
-                    </div>
-                    <div>
-                      <p
-                        class="text-xs font-semibold text-yellow-700 uppercase"
-                      >
-                        No. of Packages
-                      </p>
-                      <p
-                        class="text-sm font-medium text-gray-800"
-                        data-field="noofpackages"
-                      >
-                        {{ trip.noofpackages }}
-                      </p>
-                    </div>
-                    <div>
-                      <p
-                        class="text-xs font-semibold text-yellow-700 uppercase"
-                      >
-                        Mobile No.
-                      </p>
-                      <p
-                        class="text-sm font-medium text-gray-800"
-                        data-field="mobileno"
-                      >
-                        {{ trip.mobileno }}
-                      </p>
-                    </div>
-                    <div>
-                      <p
-                        class="text-xs font-semibold text-yellow-700 uppercase"
-                      >
-                        Driver Name
-                      </p>
-                      <p
-                        class="text-sm font-medium text-gray-800"
-                        data-field="drivername"
-                      >
-                        {{ trip.drivername }}
-                      </p>
-                    </div>
+                  <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">
+                      {% if trip.document_type == 'DC' %}
+                        Internal Document
+                      {% elif trip.document_type == 'COMMERCIAL_INVOICE' %}
+                        Commercial Invoice
+                      {% elif trip.document_type == 'PLANT_INVOICE' %}
+                        Plant Invoice
+                      {% endif %}
+                    </h3>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                      {{ trip.document_type|title }}
+                    </span>
+                    <!-- Hidden field for JS to pick document_type -->
+                    <p class="hidden" data-field="document_type">{{ trip.document_type }}</p>
+                  </div>
+                  <div class="hidden" data-field="absuniqueid">{{ trip.absuniqueid }}</div>
+                  <div class="hidden" data-field="companycode">{{ trip.companycode }}</div>
+                  <div class="hidden" data-field="divisioncode">{{ trip.divisioncode }}</div> 
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                    {% if trip.document_type == 'DC' %}
+                      <!-- DC Fields -->
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Document No:</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="provisionalcode">{{ trip.provisionalcode }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Qty</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="baseprimaryquantity">{{ trip.baseprimaryquantity }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">UOM</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="baseprimaryuomcode">{{ trip.baseprimaryuomcode }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Address</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="addressee">{{ trip.addressee }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Vehicle No.</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="vehiclenumber">{{ trip.vehiclenumber }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">No. of Packages</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="noofpackages">{{ trip.noofpackages }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Mobile No.</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="mobileno">{{ trip.mobileno }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Driver Name</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="drivername">{{ trip.drivername }}</p></div>
+
+                    {% elif trip.document_type == 'COMMERCIAL_INVOICE' %}
+                      <!-- Commercial Invoice Fields -->
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Invoice No</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="documentcode">{{ trip.documentcode }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Invoice Type</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="invoicetype">{{ trip.invoicetype }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Invoice Date</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="invoicedate">{{ trip.invoicedate }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Quantity</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="quantity">{{ trip.quantity }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">UOM</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="uom">{{ trip.uom }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Packing Qty</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="packingqty">{{ trip.packingqty }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Category</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="category">{{ trip.category }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Container No.</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="containerno">{{ trip.containerno }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Address</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="addressee">{{ trip.addressee }}</p></div>
+                      
+                    {% elif trip.document_type == 'PLANT_INVOICE' %}
+                      <!-- Plant Invoice Fields -->
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Invoice No</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="documentcode">{{ trip.documentcode }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Invoice Type</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="invoicetype">{{ trip.invoicetype }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Invoice Date</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="invoicedate">{{ trip.invoicedate }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Challan No.</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="challanno">{{ trip.challanno }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Challan Date</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="challandate">{{ trip.challandate }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Address</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="addressee">{{ trip.addressee }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Category</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="category">{{ trip.category }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Container No.</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="containerno">{{ trip.containerno }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Packing Qty</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="packingqty">{{ trip.packingqty }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">UOM</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="uom">{{ trip.uom }}</p></div>
+                      <div><p class="text-xs font-semibold text-yellow-700 uppercase">Quantity</p>
+                        <p class="text-sm font-medium text-gray-800" data-field="quantity">{{ trip.quantity }}</p></div>
+                    {% endif %}
                   </div>
                 </div>
               </div>
               {% empty %}
-              <div
-                class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
-              >
+              <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                 <div class="px-4 py-5 sm:px-6 text-center">
-                  <p class="text-sm sm:text-base text-gray-500">
-                    No Records...
-                  </p>
+                  <p class="text-sm sm:text-base text-gray-500">No Records...</p>
                 </div>
               </div>
               {% endfor %}
@@ -315,6 +290,21 @@
 <!-- QR Scanner Script -->
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
+function updateCodeField(documentType) {
+  const label = document.getElementById('code-label');
+  const input = document.getElementById('document-code');
+  
+  if (documentType === 'DC') {
+    label.textContent = 'Document Code';
+    input.name = 'provisionalcode';
+  } else {
+    label.textContent = 'Invoice No';
+    input.name = 'documentcode';
+  }
+  
+  document.getElementById('document-type').value = documentType;
+}
+
   // Enhanced Notification system - Mobile responsive
   function showNotification(type, message, duration = 5000) {
     const notificationArea = document.getElementById("notification-area");
@@ -478,37 +468,65 @@
     }
   }
 
-  // Gate Out functionality
-  document.addEventListener("DOMContentLoaded", function () {
-    const gateOutBtn = document.getElementById("gate-out-btn");
 
-    gateOutBtn.addEventListener("click", function () {
-      const tripData = {};
-      const fields = [
-        "provisionalcode",
-        "companycode",
-        "divisioncode",
-        "itemdescription",
-        "baseprimaryquantity",
-        "baseprimaryuomcode",
-        "addressee",
-        "vehiclenumber",
-        "noofpackages",
-        "mobileno",
-        "drivername",
-      ];
+// Gate Out functionality
+document.addEventListener("DOMContentLoaded", function () {
+  const gateOutBtn = document.getElementById("gate-out-btn");
 
-      fields.forEach((field) => {
-        const element = document.querySelector(`[data-field="${field}"]`);
-        tripData[field] = element ? element.textContent.trim() : "";
-      });
-
-      if (!tripData.provisionalcode) {
+  gateOutBtn.addEventListener("click", async function () {
+    try {
+      const tripCard = document.querySelector("#results-container > div");
+      if (!tripCard) {
         showNotification("error", "No trip data available to gate out");
         return;
       }
 
-      tripData.csrfmiddlewaretoken = "{{ csrf_token }}";
+      // Get document type
+      const documentType = tripCard.querySelector('[data-field="document_type"]').textContent;
+      
+      // Determine which endpoint to use
+      const endpoint = documentType === 'DC' ? '/internal-gate-out/' : '/commercial-plant-gate-out/';
+
+      // Create form data
+      const formData = new FormData();
+      formData.append('csrfmiddlewaretoken', "{{ csrf_token }}");
+      formData.append('document_type', documentType);
+
+      // Collect common fields
+      const companyCode = tripCard.querySelector('[data-field="companycode"]');
+      const divisionCode = tripCard.querySelector('[data-field="divisioncode"]');
+      const absUniqueId = tripCard.querySelector('[data-field="absuniqueid"]');
+      
+      if (!companyCode || !divisionCode) {
+        showNotification("error", "Company code and division code are required");
+        return;
+      }
+      
+      formData.append('companycode', companyCode.textContent.trim());
+      formData.append('divisioncode', divisionCode.textContent.trim());
+      
+      // Add ABSUNIQUEID if available
+      if (absUniqueId) {
+        formData.append('absuniqueid', absUniqueId.textContent.trim());
+      }
+
+      // Collect document-specific fields
+      if (documentType === 'DC') {
+        const provisionalCode = tripCard.querySelector('[data-field="provisionalcode"]');
+        if (!provisionalCode) {
+          showNotification("error", "Provisional code is required");
+          return;
+        }
+        formData.append('provisionalcode', provisionalCode.textContent.trim());
+      } 
+      else if (documentType === 'COMMERCIAL_INVOICE' || documentType === 'PLANT_INVOICE') {
+        const documentCode = tripCard.querySelector('[data-field="documentcode"]');
+        if (!documentCode) {
+          showNotification("error", "Document code is required");
+          return;
+        }
+        formData.append('documentcode', documentCode.textContent.trim());
+      }
 
       // Show loading state
       const originalText = gateOutBtn.innerHTML;
@@ -517,71 +535,55 @@
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        Processing...
-      `;
+        Processing...`;
       gateOutBtn.disabled = true;
 
-      fetch("/gate-out/", {
+      // Convert FormData to URLSearchParams
+      const params = new URLSearchParams();
+      for (const [key, value] of formData.entries()) {
+        params.append(key, value);
+      }
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": "{{ csrf_token }}"
         },
-        body: new URLSearchParams(tripData),
-      })
-        .then((response) => {
-          if (!response.ok) throw new Error("Network error");
-          return response.json();
-        })
-        .then((data) => {
-          if (data.status === "success") {
-            showNotification(
-              "success",
-              `Gate out successful! Outward No: ${data.outward_no}`
-            );
+        body: params
+      });
 
-            // Change card background to light green transparent
-            const tripCard = document.querySelector("#results-container > div");
-            if (tripCard) {
-              tripCard.classList.remove(
-                "bg-gradient-to-br",
-                "from-white",
-                "to-yellow-50",
-                "border-yellow-200"
-              );
-              tripCard.classList.add("bg-green-100/50", "border-green-300");
-            }
-          } else if (data.already_gated_out) {
-            // Handle already gated out case
-            showNotification("error", data.message);
-            
-            // Change card background to indicate already gated out
-            const tripCard = document.querySelector("#results-container > div");
-            if (tripCard) {
-              tripCard.classList.remove(
-                "bg-gradient-to-br",
-                "from-white",
-                "to-yellow-50",
-                "border-yellow-200"
-              );
-              tripCard.classList.add("bg-red-100/50", "border-red-300");
-            }
-          } else {
-            throw new Error(data.message || "Operation failed");
-          }
-        })
-        .catch((error) => {
-          console.error("Gate out error:", error);
-          showNotification(
-            "error",
-            error.message || "Failed to process gate out"
-          );
-        })
-        .finally(() => {
-          gateOutBtn.innerHTML = originalText;
-          gateOutBtn.disabled = false;
-        });
-    });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Response:", data);
+
+      if (data.status === "success") {
+        showNotification("success", `Gate out successful! Outward No: ${data.outward_no}`);
+        tripCard.classList.remove("bg-gradient-to-br", "from-white", "to-yellow-50", "border-yellow-200");
+        tripCard.classList.add("bg-green-100/50", "border-green-300");
+      } else if (data.already_gated_out) {
+        showNotification("error", data.message);
+        tripCard.classList.remove("bg-gradient-to-br", "from-white", "to-yellow-50", "border-yellow-200");
+        tripCard.classList.add("bg-red-100/50", "border-red-300");
+      } else {
+        throw new Error(data.message || "Operation failed");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      showNotification("error", error.message || "Failed to process gate out");
+    } finally {
+      gateOutBtn.innerHTML = "Gate Out";
+      gateOutBtn.disabled = false;
+    }
   });
+}); 
+
+
+
 
   // Start scanner when page loads
   window.addEventListener("load", startScanner);
@@ -598,6 +600,8 @@
 
   // Restart scanner if it stops
   setInterval(() => !isScanning && startScanner(), 5000);
+
+
 </script>
 
 {% endblock %}

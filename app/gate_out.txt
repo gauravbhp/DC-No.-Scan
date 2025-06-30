@@ -1,0 +1,179 @@
+# def gate_out(request):
+#     if request.method == 'POST':
+#         try:
+#             print("Received POST data:", request.POST.dict())  # Debug incoming data
+            
+#             provisional_code = request.POST.get('provisionalcode')
+#             if not provisional_code:
+#                 return JsonResponse({'status': 'error', 'message': 'Provisional code is required'}, status=400)
+
+#             with connection.cursor() as cursor:
+#                 # Check if already gated out
+#                 cursor.execute("""
+#                     SELECT COUNT(*) FROM DB2INST1.ADSTORAGE
+#                     WHERE UNIQUEID IN (
+#                         SELECT ABSUNIQUEID FROM DB2INST1.INTERNALDOCUMENT
+#                         WHERE PROVISIONALCODE = %s
+#                     )
+#                     AND NAMENAME = 'OUTWARDNO'
+#                     AND FIELDNAME = 'OUTWARDNO'
+#                 """, [provisional_code])
+                
+#                 already_gated_out = cursor.fetchone()[0] > 0
+                
+#                 if already_gated_out:
+#                     cursor.execute("""
+#                         SELECT VALUESTRING, VALUEDATE
+#                         FROM DB2INST1.ADSTORAGE
+#                         WHERE UNIQUEID IN (
+#                             SELECT ABSUNIQUEID FROM DB2INST1.INTERNALDOCUMENT
+#                             WHERE PROVISIONALCODE = %s
+#                         )
+#                         AND NAMENAME = 'OUTWARDNO'
+#                         AND FIELDNAME = 'OUTWARDNO'
+#                     """, [provisional_code])
+#                     outward_info = cursor.fetchone()
+                    
+#                     if outward_info:
+#                         return JsonResponse({
+#                             'status': 'error', 
+#                             'message': f'This DC has already been gated out! Outward No: {outward_info[0]}',
+#                             'already_gated_out': True
+#                         })
+#                     else:
+#                         return JsonResponse({
+#                             'status': 'error', 
+#                             'message': 'This DC has already been gated out!',
+#                             'already_gated_out': True
+#                         })
+
+#                 # Get ABSUNIQUEID
+#                 cursor.execute("""
+#                     SELECT ABSUNIQUEID 
+#                     FROM DB2INST1.INTERNALDOCUMENT 
+#                     WHERE PROVISIONALCODE = %s
+#                 """, [provisional_code])
+#                 row = cursor.fetchone()
+                
+#                 if not row:
+#                     return JsonResponse({'status': 'error', 'message': 'Provisional code not found'}, status=404)
+
+#                 absuniqueid = row[0]
+
+#                 # Generate outward number
+#                 company_code = request.POST.get('companycode', 'COMP02')
+#                 division_map = {
+#                     'COMP01': '101',
+#                     'COMP02': '102',
+#                     'COMP03': '103',
+#                     'COMP04': '106',
+#                     'COMP05': '107',
+#                 }
+#                 fixed_part = division_map.get(company_code, '102')
+#                 current_year = datetime.datetime.now().strftime('%y')
+#                 search_pattern = f"{current_year}{fixed_part}%"
+
+#                 cursor.execute("""
+#                     SELECT COALESCE(MAX(CAST(RIGHT(VALUESTRING, 5) AS INTEGER)), 0) AS MAX_NUM
+#                     FROM DB2INST1.ADSTORAGE
+#                     WHERE NAMENAME = 'OUTWARDNO'
+#                     AND FIELDNAME = 'OUTWARDNO'
+#                     AND VALUESTRING LIKE %s
+#                 """, [search_pattern])
+
+#                 max_num = cursor.fetchone()[0] or 0
+#                 new_num = max_num + 1
+#                 outward_no = f"{current_year}{fixed_part}{str(new_num).zfill(5)}"
+
+#                 # Process OUTWARDDATE
+#                 cursor.execute("""
+#                     SELECT VALUEDATE 
+#                     FROM DB2INST1.ADSTORAGE 
+#                     WHERE UNIQUEID = %s AND NAMENAME = 'OUTWARDDATE' AND FIELDNAME = 'OUTWARDDATE'
+#                 """, [absuniqueid])
+                
+#                 if cursor.fetchone():
+#                     cursor.execute("""
+#                         UPDATE DB2INST1.ADSTORAGE
+#                         SET VALUEDATE = CURRENT_DATE
+#                         WHERE UNIQUEID = %s AND NAMENAME = 'OUTWARDDATE' AND FIELDNAME = 'OUTWARDDATE'
+#                     """, [absuniqueid])
+#                 else:
+#                     cursor.execute("""
+#                         INSERT INTO DB2INST1.ADSTORAGE (
+#                             UNIQUEID, NAMEENTITYNAME, NAMENAME, FIELDNAME,
+#                             KEYSEQUENCE, SHARED, DATATYPE, VALUEINT,
+#                             VALUEBOOLEAN, VALUELONG, ABSUNIQUEID, VALUEDATE
+#                         ) VALUES (
+#                             %s, 'InternalDocument', 'OUTWARDDATE', 'OUTWARDDATE',
+#                             0, 0, 0, 0,
+#                             0, 0, %s, CURRENT_DATE
+#                         )
+#                     """, [absuniqueid, absuniqueid])
+
+#                 # Process OUTWARDNO
+#                 cursor.execute("""
+#                     SELECT * FROM DB2INST1.ADSTORAGE
+#                     WHERE UNIQUEID = %s AND NAMENAME = 'OUTWARDNO' AND FIELDNAME = 'OUTWARDNO'
+#                 """, [absuniqueid])
+                
+#                 if cursor.fetchone():
+#                     cursor.execute("""
+#                         UPDATE DB2INST1.ADSTORAGE
+#                         SET VALUESTRING = %s
+#                         WHERE UNIQUEID = %s AND NAMENAME = 'OUTWARDNO' AND FIELDNAME = 'OUTWARDNO'
+#                     """, [outward_no, absuniqueid])
+#                 else:
+#                     cursor.execute("""
+#                         INSERT INTO DB2INST1.ADSTORAGE (
+#                             UNIQUEID, NAMEENTITYNAME, NAMENAME, FIELDNAME,
+#                             KEYSEQUENCE, SHARED, DATATYPE, VALUESTRING,
+#                             VALUEINT, VALUEBOOLEAN, VALUELONG, ABSUNIQUEID
+#                         ) VALUES (
+#                             %s, 'InternalDocument', 'OUTWARDNO', 'OUTWARDNO',
+#                             0, 0, 0, %s,
+#                             0, 0, 0, %s
+#                         )
+#                     """, [absuniqueid, outward_no, absuniqueid])
+
+#                 # Log in SKAPSTESTDATA
+#                 cursor.execute("""
+#                     INSERT INTO DB2INST1.SKAPSTESTDATA (
+#                         COMPANYCODE, DIVISIONCODE, PROVISIONALCODE,
+#                         ITEMDESCRIPTION, QUANTITY, UOM, ADDRESSEE,
+#                         VEHICLENUMBER, NOOFPACKAGES, MOBILENO, DRIVERNAME,
+#                         GATEOUT_TIMESTAMP, SCAN_TIMESTAMP
+#                     ) VALUES (
+#                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+#                     )
+#                 """, [
+#                     request.POST.get('companycode'),
+#                     request.POST.get('divisioncode'),
+#                     provisional_code,
+#                     request.POST.get('itemdescription'),
+#                     request.POST.get('baseprimaryquantity'),
+#                     request.POST.get('baseprimaryuomcode'),
+#                     request.POST.get('addressee'),
+#                     request.POST.get('vehiclenumber'),
+#                     request.POST.get('noofpackages'),
+#                     request.POST.get('mobileno'),
+#                     request.POST.get('drivername')
+#                 ])
+
+#             return JsonResponse({
+#                 'status': 'success',
+#                 'message': 'Gate out processed successfully',
+#                 'outward_no': outward_no
+#             })
+
+#         except Exception as e:
+#             print("Error in gate_out:", str(e))  # Log the error
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': str(e)
+#             }, status=500)
+
+#     return JsonResponse({
+#         'status': 'error',
+#         'message': 'Invalid request method'
+#     }, status=400)

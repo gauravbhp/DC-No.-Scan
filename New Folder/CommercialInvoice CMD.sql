@@ -1,0 +1,38 @@
+// Step 1: ABSUNIQUEID
+SELECT ABSUNIQUEID 
+FROM COMMERCIALINVOICE 
+WHERE CODE = 'CD121220002';
+
+//  Step 2 — ADSTORAGE
+SELECT * 
+FROM ADSTORAGE 
+WHERE UNIQUEID = 49268665;
+
+//if not exits then creating 
+INSERT INTO ADSTORAGE (
+    UNIQUEID, 
+    NAMEENTITYNAME,
+    NAMENAME, 
+    FIELDNAME, 
+    KEYSEQUENCE, 
+    SHARED, 
+    DATATYPE, 
+    VALUEINT, 
+    VALUEBOOLEAN, 
+    VALUELONG, 
+    ABSUNIQUEID,
+    VALUEDATE
+) VALUES (
+    49268665, 
+    'CommercialInvoice',
+    'OutwardDate', 
+    'OutwardDate', 
+    0, 
+    0, 
+    0, 
+    0, 
+    0, 
+    0, 
+    49268665,
+    CURRENT_DATE
+);

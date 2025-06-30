@@ -1,0 +1,51 @@
+// Step 1: ABSUNIQUEID
+SELECT ABSUNIQUEID 
+FROM PLANTINVOICE 
+WHERE CODE = 'CD421220001';
+
+//  Step 2 — ADSTORAGE
+SELECT * 
+FROM ADSTORAGE 
+WHERE UNIQUEID = 49770789;
+
+// Step 3 - if not exits then creating 
+INSERT INTO ADSTORAGE (
+    UNIQUEID, 
+    NAMEENTITYNAME,
+    NAMENAME, 
+    FIELDNAME, 
+    KEYSEQUENCE, 
+    SHARED, 
+    DATATYPE, 
+    VALUEINT, 
+    VALUEBOOLEAN, 
+    VALUELONG, 
+    ABSUNIQUEID,
+    VALUEDATE
+) VALUES (
+    49770789, 
+    'CommercialInvoice',
+    'OutwardDate', 
+    'OutwardDate', 
+    0, 
+    0, 
+    0, 
+    0, 
+    0, 
+    0, 
+    49770789,
+    CURRENT_DATE
+);
+
+//Step 4 final check
+SELECT * 
+FROM ADSTORAGE 
+WHERE UNIQUEID = 49770789;
+
+
+// For OUTWORD NO
+SELECT *
+FROM ADSTORAGE
+WHERE UNIQUEID = 49770789 
+AND NAMENAME = 'OUTWARDNO' 
+AND FIELDNAME = 'OUTWARDNO';
